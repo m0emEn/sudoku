@@ -139,10 +139,19 @@ function solve() {
 function fillBoard() {
   let cells = document.querySelectorAll(".cell");
   let k = 0;
+  let x = 0;
+  let y = 0;
   for (let i = 0; i < 9; i++) {
-    for (let j = 0; j < 9; j++) {
-      cells[k].innerHTML = board[j][i];
-      k++;
+    for (let j = 0; j < 3; j++) {
+      for (let h = 0; h < 3; h++) {
+        cells[k].innerHTML = board[j + y][h + x];
+        k++;
+      }
+    }
+    x = x + 3;
+    if (x > 8) {
+      x = 0;
+      y = y + 3;
     }
   }
 }
