@@ -103,7 +103,7 @@ async function vis(ms) {
 
       fillBoard(row, col);
       await sleep(ms);
-      if (await vis(100)) {
+      if (await vis(10)) {
         return true;
       }
 
@@ -159,11 +159,22 @@ function generate() {
   removeNumbers(40);
   fillBoard();
 }
+async function colorize() {
+  for (let i = 0; i < 9; i++) {
+    for (let j = 0; j < 9; j++) {
+      cell = getCellElement(i, j);
+      cell.style.background = "#37ff37";
+      await sleep(50);
+    }
+  }
+}
 async function visualize() {
   generateBoard(); // Initialize the board
   fillDiagBoard();
-  await vis(100);
+  await vis(10);
+
   fillBoard();
+  await colorize();
 }
 function clearBoard() {
   board = [];
