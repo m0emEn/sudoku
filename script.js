@@ -5,7 +5,7 @@ function generateBoard() {
   for (let i = 0; i < 9; i++) {
     board[i] = [];
     for (let j = 0; j < 9; j++) {
-      board[i][j] = 0;
+      board[i][j] = "";
     }
   }
   return board;
@@ -82,6 +82,41 @@ function findEmptyLocation() {
   }
   return null;
 }
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+async function vis(ms) {
+  let empty = findEmptyLocation();
+  if (!empty) {
+    return true;
+  }
+  const { row, col } = empty;
+  let cell = getCellElement(row, col);
+
+  for (let x = 1; x < 10; x++) {
+    cell.style.background = "red";
+    cell.innerHTML = x;
+    await sleep(ms);
+    if (validCellNum(x, row, col)) {
+      board[row][col] = x;
+      cell.style.background = "transparent";
+
+      fillBoard(row, col);
+      await sleep(ms);
+      if (await vis(100)) {
+        return true;
+      }
+
+      board[row][col] = "";
+      fillBoard(row, col);
+      await sleep(ms);
+    }
+
+    cell.style.background = "transparent";
+    cell.innerHTML = "";
+  }
+  return false;
+}
 
 function fill() {
   let empty = findEmptyLocation();
@@ -92,10 +127,12 @@ function fill() {
   for (let x = 1; x < 10; x++) {
     if (validCellNum(x, row, col)) {
       board[row][col] = x;
+      fillBoard();
+
       if (fill()) {
         return true;
       }
-      board[row][col] = 0;
+      board[row][col] = "";
     }
   }
   return false;
@@ -122,36 +159,41 @@ function generate() {
   removeNumbers(40);
   fillBoard();
 }
-
+async function visualize() {
+  generateBoard(); // Initialize the board
+  fillDiagBoard();
+  await vis(100);
+  fillBoard();
+}
 function clearBoard() {
   board = [];
   let cells = document.querySelectorAll(".cell");
   cells.forEach((cell) => {
     cell.innerHTML = "";
+    cell.style.background = "transparent";
   });
 }
 
-function solve() {
+async function solve() {
   fill();
   fillBoard();
 }
-
+function getCellElement(row, col) {
+  const boxRow = Math.floor(row / 3);
+  const boxCol = Math.floor(col / 3);
+  const cellRow = row % 3;
+  const cellCol = col % 3;
+  const boxIndex = boxRow * 3 + boxCol;
+  const cellIndex = cellRow * 3 + cellCol;
+  const boxes = document.querySelectorAll(".box");
+  const cells = boxes[boxIndex].querySelectorAll(".cell");
+  return cells[cellIndex];
+}
 function fillBoard() {
-  let cells = document.querySelectorAll(".cell");
-  let k = 0;
-  let x = 0;
-  let y = 0;
   for (let i = 0; i < 9; i++) {
-    for (let j = 0; j < 3; j++) {
-      for (let h = 0; h < 3; h++) {
-        cells[k].innerHTML = board[j + y][h + x];
-        k++;
-      }
-    }
-    x = x + 3;
-    if (x > 8) {
-      x = 0;
-      y = y + 3;
+    for (let j = 0; j < 9; j++) {
+      let cell = getCellElement(i, j);
+      cell.innerHTML = board[i][j];
     }
   }
 }
